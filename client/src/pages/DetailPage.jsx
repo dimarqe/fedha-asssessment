@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { fetchApplication } from '../api.js';
+import { fetchApplication, decideApplication } from '../api.js';
 import { formatMoney, formatDate } from '../format.js';
+import { useSession } from '../session.js';
 
 export default function DetailPage() {
   const { id } = useParams();
+  const { session, signOut } = useSession();
   const [app, setApp] = useState(null);
   const [error, setError] = useState(null);
+  const [decisionError, setDecisionError] = useState(null);
+  const [deciding, setDeciding] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -21,6 +25,22 @@ export default function DetailPage() {
       cancelled = true;
     };
   }, [id]);
+
+  async function decide(decision) {
+    setDecisionError(null);
+    setDeciding(true);
+    try {
+      const updated = await decideApplication(id, decision, session.token);
+      setApp(updated);
+    } catch (err) {
+      if (err.status === 401) {
+        signOut(); // session expired (e.g. server restarted); clear the stale token
+      }
+      setDecisionError(err.message);
+    } finally {
+      setDeciding(false);
+    }
+  }
 
   if (error) {
     return (
@@ -72,10 +92,51 @@ export default function DetailPage() {
         </div>
       </dl>
 
+      <div className={`card decision-card ${app.decision.toLowerCase()}`}>
+        <div className="decision-head">
+          <h3>Officer decision</h3>
+          <span className={`badge ${app.decision.toLowerCase()}`}>{app.decision}</span>
+        </div>
+        {app.decision === 'Pending' ? (
+          session ? (
+            <>
+              <p className="note">
+                Eligibility check recommends: <strong>{app.status}</strong>. The decision is final
+                once made.
+              </p>
+              <div className="decision-actions">
+                <button type="button" disabled={deciding} onClick={() => decide('Approved')}>
+                  Approve loan
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  disabled={deciding}
+                  onClick={() => decide('Rejected')}
+                >
+                  Reject loan
+                </button>
+              </div>
+              {decisionError && <p className="error-banner">{decisionError}</p>}
+            </>
+          ) : (
+            <p className="note">
+              Awaiting review. <Link to="/login">Sign in as a loan officer</Link> to approve or
+              reject this application.
+            </p>
+          )
+        ) : (
+          <p className="note">
+            {app.decision} by {app.decidedBy} on {formatDate(app.decidedAt)}.
+          </p>
+        )}
+      </div>
+
       <h3>Repayment schedule</h3>
       {app.status === 'Rejected' && (
         <p className="note">
-          Shown for illustration — this application was rejected, so no schedule is in force.
+          Shown for illustration — this application failed the eligibility check, so no schedule
+          is in force.
         </p>
       )}
       <div className="card table-wrap">

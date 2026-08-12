@@ -22,6 +22,11 @@ for a zero-cost demo.
 - **Detail view** with a full month-by-month repayment schedule (installment, principal and
   interest components, remaining balance).
 - **Automated tests** covering the eligibility and interest logic (`server/test/loan.test.js`).
+- **Officer review** (stretch goal) — the eligibility check is an automatic recommendation;
+  a signed-in loan officer makes the final Approve/Reject decision from the detail page.
+  Sign in with username `officer`, password `fedha2026` (overridable via `OFFICER_USERNAME`
+  / `OFFICER_PASSWORD`).
+- **Decisions chart** (stretch goal) — the dashboard summarizes applications by decision state.
 
 ## Getting started
 
@@ -86,8 +91,9 @@ client/
 
 ## Deliberately left out (and why)
 
-- **Authentication / roles** — listed as a stretch goal; the core logic was the priority and an
-  unauthenticated demo is easier to review.
+- **Real account management** — the officer login is a single hardcoded account with in-memory
+  sessions (cleared on restart), which is enough to demonstrate the role gate without building
+  user administration.
 - **A real database** — a JSON file is enough for single-process, low-volume use and keeps setup
   to `npm install`. The store module is isolated so swapping in SQLite/Postgres touches one file.
 - **Status workflow (officer review, info-requested, etc.)** — the brief asks for an automatic

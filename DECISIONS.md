@@ -37,6 +37,13 @@ remainder, and there's a test asserting the schedule sums exactly.
 less consistent with "per annum". I flagged this as the kind of assumption I'd confirm with a
 product owner before shipping; changing it is a one-line edit with tests to update.
 
+## Eligibility vs. decision
+
+The automatic check (`status`) is a recommendation; the officer's call (`decision`) is a
+separate field, final once made. Keeping both means the decision is always auditable against
+what the system recommended. Auth is deliberately minimal — one officer account, in-memory
+tokens — enough to prove the role gate without building user management.
+
 ## Trade-offs made under time pressure
 
 - **No auth or officer role** — stretch goal; skipped in favour of getting the core logic
