@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchApplications } from '../api.js';
 import { formatMoney, formatDate } from '../format.js';
+import StatusChart from '../components/StatusChart.jsx';
 
 export default function DashboardPage() {
   const [status, setStatus] = useState('All');
   const [sortBy, setSortBy] = useState('date');
   const [order, setOrder] = useState('desc');
   const [applications, setApplications] = useState(null);
+  const [allApplications, setAllApplications] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -25,6 +27,19 @@ export default function DashboardPage() {
     };
   }, [status, sortBy, order]);
 
+  // The chart always summarizes the full set, independent of the table filter.
+  useEffect(() => {
+    let cancelled = false;
+    fetchApplications({})
+      .then((data) => {
+        if (!cancelled) setAllApplications(data);
+      })
+      .catch(() => {}); // chart is a bonus; the table's error banner covers API failures
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section>
       <div className="page-title">
@@ -34,9 +49,11 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      <StatusChart applications={allApplications} />
+
       <div className="card toolbar">
         <label>
-          Status
+          Eligibility
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
             <option>All</option>
             <option>Approved</option>
@@ -77,7 +94,8 @@ export default function DashboardPage() {
                 <th>Requested</th>
                 <th>Term</th>
                 <th>Monthly</th>
-                <th>Status</th>
+                <th>Eligibility</th>
+                <th>Decision</th>
                 <th>Submitted</th>
               </tr>
             </thead>
@@ -92,6 +110,9 @@ export default function DashboardPage() {
                   <td>{formatMoney(app.monthlyInstallment)}</td>
                   <td>
                     <span className={`badge ${app.status.toLowerCase()}`}>{app.status}</span>
+                  </td>
+                  <td>
+                    <span className={`badge ${app.decision.toLowerCase()}`}>{app.decision}</span>
                   </td>
                   <td>{formatDate(app.submittedAt)}</td>
                 </tr>

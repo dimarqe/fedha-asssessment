@@ -345,6 +345,122 @@ button:focus-visible,
   color: var(--rejected-text);
 }
 
+.badge.pending {
+  background: #f5ecd4;
+  color: #8a6410;
+}
+
+/* ---------- Officer decision ---------- */
+
+.decision-card.pending {
+  border-left: 4px solid var(--gold);
+}
+
+.decision-card.approved {
+  border-left: 4px solid var(--approved-text);
+}
+
+.decision-card.rejected {
+  border-left: 4px solid var(--rejected-text);
+}
+
+.decision-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.decision-head h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.decision-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+button.danger {
+  background: var(--rejected-text);
+}
+
+button.danger:hover {
+  background: #932c22;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0.35rem 0.1rem;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  background: none;
+  color: var(--pine);
+  text-decoration: underline;
+}
+
+/* ---------- Status chart ---------- */
+
+.chart-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.chart-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.chart-head h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+}
+
+.chart-label {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.chart-track {
+  display: block;
+  height: 14px;
+  border-radius: 4px;
+  background: #eff3ee;
+}
+
+.chart-bar {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  transition: width 0.3s ease;
+}
+
+.chart-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 /* ---------- Toolbar ---------- */
 
 .toolbar {
