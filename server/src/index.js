@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { validateApplication, assessApplication, LIMITS } from './loan.js';
 import { listApplications, getApplication, addApplication } from './store.js';
 
@@ -62,6 +65,19 @@ app.get('/api/applications/:id', (req, res) => {
   }
   res.json(record);
 });
+
+// In production the API also serves the built React app, so the whole thing
+// runs as a single process (e.g. on Render). In development Vite serves the
+// client itself and this block is skipped if client/dist doesn't exist.
+const CLIENT_DIST = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'client', 'dist');
+if (existsSync(CLIENT_DIST)) {
+  app.use(express.static(CLIENT_DIST));
+  // React Router owns non-API paths; always hand it index.html.
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(join(CLIENT_DIST, 'index.html'));
+  });
+}
 
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
