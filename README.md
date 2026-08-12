@@ -5,6 +5,11 @@ repayment logic, and reviewing the results. Built for the Fedha Web Developer as
 
 **Stack:** React (Vite) frontend · Node.js (Express) API · JSON-file storage
 
+**Live demo:** https://fedha-asssessment.onrender.com/ — hosted on Render's free tier, so the
+first request after a period of inactivity takes ~30 seconds while the instance wakes up, and
+submitted data resets on redeploy (the filesystem is ephemeral). Both are accepted trade-offs
+for a zero-cost demo.
+
 ## Features
 
 - **Loan application form** with client- and server-side validation (required fields, positive
