@@ -72,8 +72,8 @@ client/
 
 ## Assumptions
 
-- **Currency is KES** (Fedha reads as a Kenyan fintech context); the backend is
-  currency-agnostic — only the frontend formatting assumes KES.
+- **Currency is JMD** (Fedha operates in Jamaica), displayed as J$ to avoid reading as USD;
+  the backend is currency-agnostic — only the frontend formatting assumes JMD.
 - **Money is computed in integer cents** to avoid floating-point drift. Installments are rounded
   to the cent and the **final installment absorbs the rounding remainder**, so the schedule
   always sums exactly to the total repayable.

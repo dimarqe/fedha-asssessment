@@ -1,13 +1,15 @@
-const kes = new Intl.NumberFormat('en-KE', {
+const jmd = new Intl.NumberFormat('en-JM', {
   style: 'currency',
-  currency: 'KES',
+  currency: 'JMD',
   minimumFractionDigits: 2,
 });
 
-export const formatMoney = (value) => kes.format(value);
+// en-JM formats JMD with a bare "$", which reads as USD outside Jamaica —
+// prefix J for the unambiguous local form: J$13,111.11
+export const formatMoney = (value) => 'J' + jmd.format(value);
 
 export const formatDate = (iso) =>
-  new Date(iso).toLocaleString('en-KE', {
+  new Date(iso).toLocaleString('en-JM', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

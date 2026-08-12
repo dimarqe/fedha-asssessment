@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { submitApplication, ApiError } from '../api.js';
 import { formatMoney } from '../format.js';
 
-const EMPTY_FORM = { fullName: '', monthlyIncome: '', requestedAmount: '', termMonths: '' };
+const TERM = { min: 1, max: 72 };
+
+const EMPTY_FORM = { fullName: '', monthlyIncome: '', requestedAmount: '', termMonths: 12 };
 
 /**
  * Client-side validation mirrors the server rules for instant feedback;
@@ -86,14 +88,14 @@ export default function ApplyPage() {
             type="text"
             value={form.fullName}
             onChange={setField('fullName')}
-            placeholder="e.g. Amina Odhiambo"
+            placeholder="e.g. Andre Campbell"
             maxLength={100}
           />
           {errors.fullName && <span className="field-error">{errors.fullName}</span>}
         </label>
 
         <label>
-          Monthly income (KES)
+          Monthly income (JMD)
           <input
             type="number"
             value={form.monthlyIncome}
@@ -105,7 +107,7 @@ export default function ApplyPage() {
         </label>
 
         <label>
-          Requested amount (KES)
+          Requested amount (JMD)
           <input
             type="number"
             value={form.requestedAmount}
@@ -117,17 +119,25 @@ export default function ApplyPage() {
         </label>
 
         <label>
-          Loan term (months)
+          <span className="range-head">
+            Loan term
+            <span className="range-value">
+              {form.termMonths} {Number(form.termMonths) === 1 ? 'month' : 'months'}
+            </span>
+          </span>
           <input
-            type="number"
+            type="range"
             value={form.termMonths}
             onChange={setField('termMonths')}
-            placeholder="e.g. 12"
-            min="1"
-            max="72"
+            min={TERM.min}
+            max={TERM.max}
             step="1"
+            style={{ '--fill': `${((form.termMonths - TERM.min) / (TERM.max - TERM.min)) * 100}%` }}
           />
-          {errors.termMonths && <span className="field-error">{errors.termMonths}</span>}
+          <span className="range-scale">
+            <span>{TERM.min} month</span>
+            <span>{TERM.max} months</span>
+          </span>
         </label>
 
         <button type="submit" disabled={submitting}>

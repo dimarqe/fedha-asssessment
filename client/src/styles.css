@@ -1,15 +1,17 @@
 :root {
-  --bg: #f5f6f8;
-  --surface: #ffffff;
-  --text: #1c2430;
-  --muted: #5c6675;
-  --border: #dfe3e9;
+  --pine: #0e2a20;
   --brand: #0f6b4f;
   --brand-dark: #0b533d;
+  --gold: #d9a114;
+  --bg: #eef3ee;
+  --surface: #ffffff;
+  --muted: #5b6a63;
+  --border: #dce4dd;
   --approved-bg: #e3f4ec;
   --approved-text: #14683f;
   --rejected-bg: #fbe9e7;
   --rejected-text: #b3362a;
+  --display: 'Fraunces', Georgia, serif;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
@@ -20,15 +22,17 @@
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--text);
-  line-height: 1.5;
+  color: var(--pine);
+  line-height: 1.55;
 }
 
 .app {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 1rem 3rem;
+  padding: 0 1.25rem 3rem;
 }
+
+/* ---------- Header ---------- */
 
 .app-header {
   display: flex;
@@ -36,42 +40,57 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.5rem;
+  padding: 1.4rem 0 1.1rem;
+  border-bottom: 2px solid var(--gold);
+  margin-bottom: 2rem;
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.35rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.45rem;
   color: var(--brand);
+  letter-spacing: 0.01em;
 }
 
 .app-header h1 span {
-  font-weight: 400;
+  font-weight: 500;
+  font-size: 1.05rem;
   color: var(--muted);
 }
 
 .app-header nav {
   display: flex;
-  gap: 1rem;
+  gap: 1.4rem;
 }
 
 .app-header nav a {
   text-decoration: none;
   color: var(--muted);
-  padding: 0.35rem 0.2rem;
+  padding: 0.35rem 0.1rem;
   border-bottom: 2px solid transparent;
+  margin-bottom: -1.15rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.app-header nav a:hover {
+  color: var(--pine);
 }
 
 .app-header nav a.active {
   color: var(--brand);
   border-bottom-color: var(--brand);
-  font-weight: 600;
 }
 
+/* ---------- Headings & titles ---------- */
+
 h2 {
-  margin: 0 0 0.75rem;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.6rem;
+  margin: 0 0 1rem;
 }
 
 .page-title {
@@ -79,43 +98,58 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0.5rem 0 1rem;
+  margin: 0.25rem 0 1.1rem;
 }
+
+.page-title h2 {
+  margin: 0;
+}
+
+/* ---------- Cards ---------- */
 
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.25rem;
+  border-radius: 12px;
+  padding: 1.5rem;
   margin-bottom: 1.25rem;
+  box-shadow: 0 6px 18px rgba(14, 42, 32, 0.05);
 }
 
-/* Form */
+/* ---------- Form ---------- */
+
 .form {
   display: grid;
-  gap: 1rem;
+  gap: 1.15rem;
   max-width: 480px;
 }
 
 .form label {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.35rem;
   font-weight: 600;
   font-size: 0.92rem;
 }
 
 .form input {
-  padding: 0.55rem 0.7rem;
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 400;
+  color: var(--pine);
+  background: var(--surface);
 }
 
-.form input:focus {
-  outline: 2px solid var(--brand);
+.form input::placeholder {
+  color: #9aa8a0;
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
   outline-offset: 1px;
-  border-color: var(--brand);
+  border-color: var(--gold);
 }
 
 .field-error {
@@ -124,18 +158,84 @@ h2 {
   font-weight: 400;
 }
 
+/* ---------- Range slider ---------- */
+
+.range-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.range-value {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  margin: 0.4rem 0 0.1rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--gold) var(--fill, 0%),
+    #e2e8e2 var(--fill, 0%)
+  );
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(14, 42, 32, 0.35);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(14, 42, 32, 0.35);
+}
+
+input[type='range']:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.range-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* ---------- Buttons ---------- */
+
 button,
 .button {
   display: inline-block;
   background: var(--brand);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 0.6rem 1.1rem;
+  border-radius: 8px;
+  padding: 0.65rem 1.25rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.15s ease;
 }
 
 button:hover,
@@ -148,18 +248,26 @@ button:disabled {
   cursor: default;
 }
 
+button:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Messages ---------- */
+
 .error-banner {
   background: var(--rejected-bg);
   color: var(--rejected-text);
   border: 1px solid currentColor;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0.6rem 0.9rem;
   margin: 0.75rem 0 0;
 }
 
 .empty-state {
   color: var(--muted);
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   text-align: center;
 }
 
@@ -170,9 +278,11 @@ button:disabled {
 
 .reason {
   color: var(--muted);
+  margin-top: 0;
 }
 
-/* Outcome + summary */
+/* ---------- Outcome & summary ---------- */
+
 .outcome.approved {
   border-left: 4px solid var(--approved-text);
 }
@@ -186,33 +296,43 @@ button:disabled {
   align-items: center;
   gap: 0.6rem;
   margin-top: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.25rem;
 }
 
 .summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.9rem;
+  gap: 1rem;
   margin: 0;
 }
 
 .summary dt {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .summary dd {
-  margin: 0;
-  font-size: 1.05rem;
+  margin: 0.1rem 0 0;
+  font-family: var(--display);
   font-weight: 600;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Badges */
+/* ---------- Badges ---------- */
+
 .badge {
   display: inline-block;
-  padding: 0.15rem 0.6rem;
+  padding: 0.15rem 0.65rem;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .badge.approved {
@@ -225,32 +345,34 @@ button:disabled {
   color: var(--rejected-text);
 }
 
-/* Toolbar */
+/* ---------- Toolbar ---------- */
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 1.25rem;
-  padding: 0.9rem 1.25rem;
+  padding: 0.9rem 1.5rem;
 }
 
 .toolbar label {
   display: grid;
   gap: 0.25rem;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--muted);
 }
 
 .toolbar select {
-  padding: 0.4rem 0.5rem;
+  padding: 0.45rem 0.55rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.95rem;
   background: var(--surface);
-  color: var(--text);
+  color: var(--pine);
 }
 
-/* Tables */
+/* ---------- Tables ---------- */
+
 .table-wrap {
   padding: 0;
   overflow-x: auto;
@@ -265,16 +387,20 @@ table {
 th,
 td {
   text-align: left;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1.1rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 th {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.07em;
+}
+
+td {
+  font-variant-numeric: tabular-nums;
 }
 
 tbody tr:last-child td {
@@ -282,15 +408,37 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-  background: #fafbfc;
+  background: #f6faf6;
 }
 
-td a {
+td a,
+main a {
   color: var(--brand);
   font-weight: 600;
   text-decoration: none;
 }
 
-td a:hover {
+td a:hover,
+main a:hover {
   text-decoration: underline;
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .card,
+  .outcome {
+    animation: rise 0.3s ease-out both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
