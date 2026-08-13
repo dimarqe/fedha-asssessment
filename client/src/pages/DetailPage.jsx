@@ -11,6 +11,7 @@ export default function DetailPage() {
   const [error, setError] = useState(null);
   const [decisionError, setDecisionError] = useState(null);
   const [deciding, setDeciding] = useState(false);
+  const [confirming, setConfirming] = useState(null); // decision awaiting a second click
 
   useEffect(() => {
     let cancelled = false;
@@ -26,7 +27,17 @@ export default function DetailPage() {
     };
   }, [id]);
 
+  /** Deciding against the eligibility recommendation takes a second, explicit click. */
+  function requestDecision(decision) {
+    if (decision !== app.status && confirming !== decision) {
+      setConfirming(decision);
+      return;
+    }
+    decide(decision);
+  }
+
   async function decide(decision) {
+    setConfirming(null);
     setDecisionError(null);
     setDeciding(true);
     try {
@@ -105,18 +116,25 @@ export default function DetailPage() {
                 once made.
               </p>
               <div className="decision-actions">
-                <button type="button" disabled={deciding} onClick={() => decide('Approved')}>
-                  Approve loan
+                <button type="button" disabled={deciding} onClick={() => requestDecision('Approved')}>
+                  {confirming === 'Approved' ? 'Confirm approval' : 'Approve loan'}
                 </button>
                 <button
                   type="button"
                   className="danger"
                   disabled={deciding}
-                  onClick={() => decide('Rejected')}
+                  onClick={() => requestDecision('Rejected')}
                 >
-                  Reject loan
+                  {confirming === 'Rejected' ? 'Confirm rejection' : 'Reject loan'}
                 </button>
               </div>
+              {confirming && (
+                <p className="override-warning">
+                  This goes against the eligibility recommendation ({app.status}). Click{' '}
+                  {confirming === 'Approved' ? '“Confirm approval”' : '“Confirm rejection”'} to
+                  proceed.
+                </p>
+              )}
               {decisionError && <p className="error-banner">{decisionError}</p>}
             </>
           ) : (
@@ -133,36 +151,36 @@ export default function DetailPage() {
       </div>
 
       <h3>Repayment schedule</h3>
-      {app.status === 'Rejected' && (
-        <p className="note">
-          Shown for illustration — this application failed the eligibility check, so no schedule
-          is in force.
+      {app.status === 'Rejected' ? (
+        <p className="empty-state">
+          No repayment schedule — this application did not pass the eligibility check.
         </p>
-      )}
-      <div className="card table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Installment</th>
-              <th>Principal</th>
-              <th>Interest</th>
-              <th>Remaining balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {app.schedule.map((row) => (
-              <tr key={row.month}>
-                <td>{row.month}</td>
-                <td>{formatMoney(row.installment)}</td>
-                <td>{formatMoney(row.principalComponent)}</td>
-                <td>{formatMoney(row.interestComponent)}</td>
-                <td>{formatMoney(row.remainingBalance)}</td>
+      ) : (
+        <div className="card table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Installment</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Remaining balance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {app.schedule.map((row) => (
+                <tr key={row.month}>
+                  <td>{row.month}</td>
+                  <td>{formatMoney(row.installment)}</td>
+                  <td>{formatMoney(row.principalComponent)}</td>
+                  <td>{formatMoney(row.interestComponent)}</td>
+                  <td>{formatMoney(row.remainingBalance)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }

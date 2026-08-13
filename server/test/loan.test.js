@@ -20,6 +20,28 @@ test('eligibility: approves exactly at the 40% boundary', () => {
   assert.equal(result.maxEligible, 120_000);
 });
 
+test('eligibility: boundary is exact across awkward income/term combinations', () => {
+  // Amounts with fractional cents and terms that don't divide evenly — the max
+  // eligible amount must be approved and one cent more must be rejected.
+  const cases = [
+    [33_333.35, 7],
+    [123_456.78, 11],
+    [9_999_999.95, 72],
+    [0.05, 3],
+  ];
+  for (const [monthlyIncome, termMonths] of cases) {
+    const { maxEligible } = checkEligibility({ monthlyIncome, requestedAmount: 1, termMonths });
+    const atLimit = checkEligibility({ monthlyIncome, requestedAmount: maxEligible, termMonths });
+    assert.equal(atLimit.eligible, true, `at-limit should pass for income ${monthlyIncome}, term ${termMonths}`);
+    const oneCentOver = checkEligibility({
+      monthlyIncome,
+      requestedAmount: maxEligible + 0.01,
+      termMonths,
+    });
+    assert.equal(oneCentOver.eligible, false, `one cent over should fail for income ${monthlyIncome}, term ${termMonths}`);
+  }
+});
+
 test('interest: flat 12% p.a. is scaled by term length, not fixed at one year', () => {
   // 12 months: 10,000 * 12% * 1yr = 1,200 interest -> 11,200 total, 933.33 monthly
   const oneYear = computeRepayment({ requestedAmount: 10_000, termMonths: 12 });

@@ -33,6 +33,10 @@ async function request(path, options = {}) {
   return body;
 }
 
+export function fetchLimits() {
+  return request('/api/limits');
+}
+
 export function submitApplication(payload) {
   return request('/api/applications', { method: 'POST', body: JSON.stringify(payload) });
 }

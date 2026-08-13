@@ -63,7 +63,9 @@ export function validateApplication(input) {
  * Returns { eligible, maxEligible, reason }.
  */
 export function checkEligibility({ monthlyIncome, requestedAmount, termMonths }) {
-  const maxEligibleCents = Math.floor(toCents(monthlyIncome) * termMonths * ELIGIBILITY_RATIO);
+  // 40% (= ELIGIBILITY_RATIO) as exact integer math: ×2/5 on integer cents avoids
+  // binary-float error from multiplying by 0.4 right at the eligibility boundary.
+  const maxEligibleCents = Math.floor((toCents(monthlyIncome) * termMonths * 2) / 5);
   const requestedCents = toCents(requestedAmount);
   const maxEligible = fromCents(maxEligibleCents);
 

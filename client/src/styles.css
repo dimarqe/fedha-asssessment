@@ -383,6 +383,15 @@ button:focus-visible,
   margin-top: 0.75rem;
 }
 
+.override-warning {
+  margin: 0.75rem 0 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: #f5ecd4;
+  color: #8a6410;
+  font-size: 0.9rem;
+}
+
 button.danger {
   background: var(--rejected-text);
 }

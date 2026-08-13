@@ -107,7 +107,7 @@ export default function DashboardPage() {
                   </td>
                   <td>{formatMoney(app.requestedAmount)}</td>
                   <td>{app.termMonths} mo</td>
-                  <td>{formatMoney(app.monthlyInstallment)}</td>
+                  <td>{app.status === 'Rejected' ? '—' : formatMoney(app.monthlyInstallment)}</td>
                   <td>
                     <span className={`badge ${app.status.toLowerCase()}`}>{app.status}</span>
                   </td>
