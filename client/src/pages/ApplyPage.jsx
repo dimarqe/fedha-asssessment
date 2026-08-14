@@ -151,15 +151,21 @@ export default function ApplyPage() {
               {form.termMonths} {Number(form.termMonths) === 1 ? 'month' : 'months'}
             </span>
           </span>
-          <input
-            type="range"
-            value={form.termMonths}
-            onChange={setField('termMonths')}
-            min={term.min}
-            max={term.max}
-            step="1"
-            style={{ '--fill': `${((form.termMonths - term.min) / (term.max - term.min)) * 100}%` }}
-          />
+          {/* The bar is its own element so the handle can reach both ends —
+              see the .range-track rules. --p is the 0–1 progress. */}
+          <span
+            className="range-track"
+            style={{ '--p': String((form.termMonths - term.min) / (term.max - term.min)) }}
+          >
+            <input
+              type="range"
+              value={form.termMonths}
+              onChange={setField('termMonths')}
+              min={term.min}
+              max={term.max}
+              step="1"
+            />
+          </span>
           <span className="range-scale">
             <span>{term.min} month</span>
             <span>{term.max} months</span>

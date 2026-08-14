@@ -173,44 +173,82 @@ select:focus-visible {
   font-size: 1.05rem;
 }
 
-input[type='range'] {
+/*
+ * The native thumb is always kept inside its track: its centre can only travel
+ * from half a thumb in to half a thumb short of the end, so the handle never
+ * reaches the ends of the bar. To let it run end to end, the bar is its own
+ * element and the input is overlaid half a thumb wider on each side — the
+ * thumb's travel range then lines up exactly with the visible ends, and the
+ * fill can be a plain 0–100% of the bar.
+ */
+.range-track {
+  --thumb: 22px;
+  position: relative;
+  display: block;
+  height: 8px;
+  margin: 0.9rem 0 0.55rem;
+  border-radius: 999px;
+  background: #e2e8e2;
+}
+
+.range-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+.range-track input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
-  height: 8px;
-  margin: 0.4rem 0 0.1rem;
-  border-radius: 999px;
-  background: linear-gradient(
-    to right,
-    var(--gold) var(--fill, 0%),
-    #e2e8e2 var(--fill, 0%)
-  );
+  position: absolute;
+  top: 50%;
+  left: calc(var(--thumb) / -2);
+  width: calc(100% + var(--thumb));
+  height: var(--thumb);
+  margin: 0;
+  transform: translateY(-50%);
+  background: none;
   cursor: pointer;
 }
 
-input[type='range']::-webkit-slider-thumb {
+.range-track input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
+  /* Explicit, because the `*` reset above doesn't reach pseudo-elements — the
+     3px border must sit inside --thumb for the overlay width to hold. */
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
   border-radius: 50%;
   background: var(--gold);
   border: 3px solid #fff;
   box-shadow: 0 1px 4px rgba(14, 42, 32, 0.35);
 }
 
-input[type='range']::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+/* Must match the WebKit thumb, or the overlay width is wrong here. */
+.range-track input[type='range']::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--thumb);
+  height: var(--thumb);
   border-radius: 50%;
   background: var(--gold);
   border: 3px solid #fff;
   box-shadow: 0 1px 4px rgba(14, 42, 32, 0.35);
 }
 
-input[type='range']:focus-visible {
+/* Focus ring goes on the bar, not the wider invisible input. */
+.range-track:has(input:focus-visible) {
   outline: 2px solid var(--gold);
-  outline-offset: 4px;
+  outline-offset: 6px;
+}
+
+.range-track input[type='range']:focus-visible {
+  outline: none;
 }
 
 .range-scale {
