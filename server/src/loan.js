@@ -6,7 +6,7 @@
  */
 
 export const ANNUAL_INTEREST_RATE = 0.12; // flat 12% per annum on original principal
-export const ELIGIBILITY_RATIO = 0.4; // requested amount must not exceed 40% of income * term
+export const ELIGIBILITY_PERCENT = 40; // requested amount must not exceed 40% of income * term
 
 export const LIMITS = {
   name: { min: 2, max: 100 },
@@ -63,9 +63,10 @@ export function validateApplication(input) {
  * Returns { eligible, maxEligible, reason }.
  */
 export function checkEligibility({ monthlyIncome, requestedAmount, termMonths }) {
-  // 40% (= ELIGIBILITY_RATIO) as exact integer math: ×2/5 on integer cents avoids
-  // binary-float error from multiplying by 0.4 right at the eligibility boundary.
-  const maxEligibleCents = Math.floor((toCents(monthlyIncome) * termMonths * 2) / 5);
+  // Applying the percentage as integer math (x40 then /100 on integer cents)
+  // avoids the binary-float error that multiplying by 0.4 introduces right at
+  // the eligibility boundary.
+  const maxEligibleCents = Math.floor((toCents(monthlyIncome) * termMonths * ELIGIBILITY_PERCENT) / 100);
   const requestedCents = toCents(requestedAmount);
   const maxEligible = fromCents(maxEligibleCents);
 
@@ -73,13 +74,13 @@ export function checkEligibility({ monthlyIncome, requestedAmount, termMonths })
     return {
       eligible: true,
       maxEligible,
-      reason: `Requested amount is within the limit of 40% of income over the term (max ${maxEligible.toFixed(2)}).`,
+      reason: `Requested amount is within the limit of ${ELIGIBILITY_PERCENT}% of income over the term (max ${maxEligible.toFixed(2)}).`,
     };
   }
   return {
     eligible: false,
     maxEligible,
-    reason: `Requested amount exceeds 40% of income over the term (max eligible: ${maxEligible.toFixed(2)}).`,
+    reason: `Requested amount exceeds ${ELIGIBILITY_PERCENT}% of income over the term (max eligible: ${maxEligible.toFixed(2)}).`,
   };
 }
 
