@@ -37,20 +37,35 @@ remainder, and there's a test asserting the schedule sums exactly.
 less consistent with "per annum". I flagged this as the kind of assumption I'd confirm with a
 product owner before shipping; changing it is a one-line edit with tests to update.
 
-## Eligibility vs. decision
+## One status, not two — a stretch goal I built and then removed
 
-The automatic check (`status`) is a recommendation; the officer's call (`decision`) is a
-separate field, final once made. Keeping both means the decision is always auditable against
-what the system recommended. Auth is deliberately minimal — one officer account, in-memory
-tokens — enough to prove the role gate without building user management.
+I built the optional officer-authentication stretch goal: a login, a role gate on the server,
+and a human Approve/Reject decision stored separately from the automatic eligibility result.
+It worked, and I took it out again.
+
+The problem was what it did to the applicant. The brief asks for an eligibility outcome
+displayed as Approved or Rejected; adding an officer decision meant every application carried
+two statuses that could disagree — "Approved" by the rule and "Pending" or "Rejected" by a
+person. There is no honest way to show both to a customer at a glance, and the word they read
+first is "Approved". Papering over it took a derived third status, per-combination wording, and
+a stack of edge cases (approved-by-exception, declined-after-review) that the brief never asked
+for.
+
+So I cut it. One application, one status, decided by the stated rule. That costs the
+authentication stretch goal — a deliberate trade: the brief is explicit that nailing the core
+requirements scores higher than reaching for stretch goals at their expense. The officer
+workflow that would resolve this properly is a real state machine with an audit trail, which I
+designed in my Part A answers rather than half-built here.
 
 ## Trade-offs made under time pressure
 
-- **No auth or officer role** — stretch goal; skipped in favour of getting the core logic
-  correct and tested.
-- **Decisions are instant** (Approved/Rejected at submission) rather than a review workflow with
-  intermediate statuses. The richer state machine is designed in my Part A answers; building it
-  here would have doubled the surface area without demonstrating much more.
+- **No auth or officer role** — see above: built, then removed in favour of one unambiguous
+  status per application. A role picker without a password was the other option, but selecting
+  a role isn't authenticating as one, and "anyone who visits can approve a loan" is the wrong
+  default for a lending system.
+- **No intermediate statuses.** An application is Approved or Rejected the moment it's assessed.
+  The richer state machine is designed in my Part A answers; building it here would have doubled
+  the surface area without demonstrating much more.
 - **Tests target the domain logic only.** The API layer is thin enough to verify by hand;
   the money math is where a subtle bug would actually hurt.
 - **Plain CSS, no component library** — the UI needed to be clear, not impressive, and one small
@@ -59,10 +74,13 @@ tokens — enough to prove the role gate without building user management.
 ## What I'd do differently with more time
 
 1. **SQLite via the store interface** — real persistence with zero infrastructure.
-2. **Officer review workflow** — the Submitted → Under Review → Approved/Rejected/Info-Requested
-   state machine from Part A, with an audit trail of status changes.
+2. **Officer review workflow, done properly** — the Submitted → Under Review →
+   Approved/Rejected/Info-Requested state machine from Part A, with real accounts, an audit
+   trail of every transition, and applicant-facing wording designed around it rather than
+   bolted on.
 3. **API-level integration tests** (supertest) on top of the unit tests.
-4. **Deployment** — the client is a static build and the server is a single Node process, so
-   Render/Railway would host it with minimal config.
+4. **Durable hosting** — the app is deployed, but Render's free tier gives it an ephemeral disk,
+   so the JSON store resets on every deploy. Seeding demo data on an empty store keeps the demo
+   usable; a real fix is a managed database, which is the same change as (1).
 5. **Accessibility pass** — the form has labels and keyboard focus states, but I'd want proper
    `aria-live` announcements for validation errors and the submission outcome.

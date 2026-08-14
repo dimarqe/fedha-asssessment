@@ -8,7 +8,9 @@ repayment logic, and reviewing the results. Built for the Fedha Web Developer as
 **Live demo:** https://fedha-asssessment.onrender.com/ — hosted on Render's free tier, so the
 first request after a period of inactivity takes ~30 seconds while the instance wakes up, and
 submitted data resets on redeploy (the filesystem is ephemeral). Both are accepted trade-offs
-for a zero-cost demo.
+for a zero-cost demo. An empty store seeds five demo applications on first boot, so the
+dashboard always has something to filter, sort and decide on — set `SEED_DEMO_DATA=false` to
+start empty instead.
 
 ## Features
 
@@ -21,12 +23,9 @@ for a zero-cost demo.
 - **Dashboard** listing all applications, filterable by status and sortable by date or amount.
 - **Detail view** with a full month-by-month repayment schedule (installment, principal and
   interest components, remaining balance).
-- **Automated tests** covering the eligibility and interest logic (`server/test/loan.test.js`).
-- **Officer review** (stretch goal) — the eligibility check is an automatic recommendation;
-  a signed-in loan officer makes the final Approve/Reject decision from the detail page.
-  Sign in with username `officer`, password `fedha2026` (overridable via `OFFICER_USERNAME`
-  / `OFFICER_PASSWORD`).
-- **Decisions chart** (stretch goal) — the dashboard summarizes applications by decision state.
+- **Automated tests** covering the eligibility and interest logic (`server/test/loan.test.js`)
+  and the demo seed data (`server/test/seed.test.js`).
+- **Outcomes chart** (stretch goal) — the dashboard summarizes applications by status.
 
 ## Getting started
 
@@ -59,10 +58,12 @@ npm test
 server/
   src/loan.js      # core domain logic: validation, eligibility, interest, schedule
   src/store.js     # JSON-file persistence (atomic writes)
+  src/seed.js      # demo applications for an empty store
   src/index.js     # Express API
-  test/loan.test.js
+  test/            # loan.test.js, seed.test.js
 client/
   src/pages/       # Apply form, Dashboard, Application detail
+  src/components/  # StatusChart
   src/api.js       # fetch wrapper that surfaces server errors to the UI
 ```
 
@@ -84,20 +85,23 @@ client/
   always sums exactly to the total repayable.
 - The 40% eligibility boundary is **inclusive**: requesting exactly 40% of income × term is
   approved.
-- Rejected applications still display an illustrative repayment schedule (labelled as such), so
-  an applicant can see what the terms *would* have been.
+- Rejected applications show **no repayment schedule** — the submission outcome still displays
+  what the loan would have cost, but a schedule implies a loan that exists.
 - Validation bounds: amount 500–5,000,000; term 1–72 months; income up to 10,000,000/month.
   These are guesses at "sensible" — in reality they'd be product decisions.
 
 ## Deliberately left out (and why)
 
-- **Real account management** — the officer login is a single hardcoded account with in-memory
-  sessions (cleared on restart), which is enough to demonstrate the role gate without building
-  user administration.
+- **Authentication and an officer role** — the brief's core requirement is an automatic
+  Approved/Rejected outcome, and adding a human decision step on top of it gave an applicant two
+  conflicting statuses to read. I chose the simpler, unambiguous model: one status per
+  application, decided by the eligibility rule.
 - **A real database** — a JSON file is enough for single-process, low-volume use and keeps setup
   to `npm install`. The store module is isolated so swapping in SQLite/Postgres touches one file.
-- **Status workflow (officer review, info-requested, etc.)** — the brief asks for an automatic
-  Approved/Rejected outcome; the fuller state machine is sketched in my Part A answers instead.
+- **The fuller status workflow** — every application here lands on Approved or Rejected
+  immediately. The richer state machine (Under Review, Info Requested, officer decisions,
+  appeals, an audit trail of every transition) is designed in my Part A answers; building it
+  would have doubled the surface area without demonstrating much more.
 - **Pagination** — unnecessary at assessment scale; the list endpoint already strips schedules
   to keep payloads small.
 
