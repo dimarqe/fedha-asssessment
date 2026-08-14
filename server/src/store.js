@@ -10,6 +10,7 @@ import { mkdirSync, readFileSync, writeFileSync, renameSync, existsSync } from '
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
+import { seedApplications } from './seed.js';
 
 const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'data');
 const DATA_FILE = join(DATA_DIR, 'applications.json');
@@ -20,9 +21,12 @@ function load() {
   if (applications !== null) return;
   if (existsSync(DATA_FILE)) {
     applications = JSON.parse(readFileSync(DATA_FILE, 'utf8'));
-  } else {
-    applications = [];
+    return;
   }
+  // A fresh store (including every deploy, since the host's disk is ephemeral)
+  // starts with demo data so there is something to review straight away.
+  applications = process.env.SEED_DEMO_DATA === 'false' ? [] : seedApplications();
+  persist();
 }
 
 function persist() {
