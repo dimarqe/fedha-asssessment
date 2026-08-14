@@ -4,11 +4,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateApplication, assessApplication, LIMITS } from './loan.js';
-import { listApplications, getApplication, addApplication, updateApplication } from './store.js';
-import { login, logout, requireOfficer, bearerToken } from './auth.js';
-
-/** Officer decision defaults to Pending for records created before the field existed. */
-const withDecision = (record) => ({ decision: 'Pending', decidedBy: null, decidedAt: null, ...record });
+import { listApplications, getApplication, addApplication } from './store.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -19,45 +15,6 @@ app.use(express.json());
 /** Validation limits, so the client can mirror server rules without duplicating them. */
 app.get('/api/limits', (req, res) => {
   res.json(LIMITS);
-});
-
-/** Loan-officer sign in. */
-app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body ?? {};
-  const session = login(username, password);
-  if (!session) {
-    return res.status(401).json({ message: 'Incorrect username or password.' });
-  }
-  res.json(session);
-});
-
-app.post('/api/auth/logout', (req, res) => {
-  logout(bearerToken(req));
-  res.status(204).end();
-});
-
-/**
- * Officer decision on an application. Eligibility (`status`) is the automatic
- * recommendation; `decision` is the human call, and it's final once made.
- */
-app.patch('/api/applications/:id/decision', requireOfficer, (req, res) => {
-  const { decision } = req.body ?? {};
-  if (decision !== 'Approved' && decision !== 'Rejected') {
-    return res.status(422).json({ message: 'Decision must be Approved or Rejected.' });
-  }
-  const record = getApplication(req.params.id);
-  if (!record) {
-    return res.status(404).json({ message: 'Application not found.' });
-  }
-  if (withDecision(record).decision !== 'Pending') {
-    return res.status(409).json({ message: `This application was already decided (${record.decision}).` });
-  }
-  const updated = updateApplication(req.params.id, {
-    decision,
-    decidedBy: req.officer.name,
-    decidedAt: new Date().toISOString(),
-  });
-  res.json(updated);
 });
 
 /** Submit a new loan application. */
@@ -79,9 +36,6 @@ app.post('/api/applications', (req, res) => {
     requestedAmount,
     termMonths,
     ...assessment,
-    decision: 'Pending',
-    decidedBy: null,
-    decidedAt: null,
   });
   res.status(201).json(record);
 });
@@ -100,7 +54,7 @@ app.get('/api/applications', (req, res) => {
   items.sort((a, b) => (key(a) < key(b) ? -dir : key(a) > key(b) ? dir : 0));
 
   // The dashboard doesn't need full schedules; keep the list payload lean.
-  res.json(items.map(({ schedule, ...rest }) => withDecision(rest)));
+  res.json(items.map(({ schedule, ...rest }) => rest));
 });
 
 /** Application detail, including the full repayment schedule. */
@@ -109,7 +63,7 @@ app.get('/api/applications/:id', (req, res) => {
   if (!record) {
     return res.status(404).json({ message: 'Application not found.' });
   }
-  res.json(withDecision(record));
+  res.json(record);
 });
 
 // In production the API also serves the built React app, so the whole thing

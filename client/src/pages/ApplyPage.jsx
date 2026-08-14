@@ -182,7 +182,7 @@ export default function ApplyPage() {
       {result && (
         <div className={`card outcome ${result.status.toLowerCase()}`}>
           <h3>
-            {eligible ? 'Eligible — submitted for review' : 'Not eligible'}
+            Application {eligible ? 'approved' : 'rejected'}
             <span className={`badge ${result.status.toLowerCase()}`}>{result.status}</span>
           </h3>
           <p className="reason">{result.reason}</p>
@@ -201,12 +201,7 @@ export default function ApplyPage() {
             </div>
           </dl>
           {eligible ? (
-            <>
-              <p className="note">
-                A loan officer makes the final decision — track it on the dashboard.
-              </p>
-              <Link to={`/applications/${result.id}`}>View full repayment schedule →</Link>
-            </>
+            <Link to={`/applications/${result.id}`}>View full repayment schedule →</Link>
           ) : (
             <p className="note">
               The figures above show what this loan would have cost. Try a smaller amount or a

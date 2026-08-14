@@ -1,10 +1,9 @@
 /**
- * Applications-by-decision summary, drawn as plain HTML bars (no chart
- * library for three bars). Colors are CVD-validated; every bar also carries
- * a text label and count, so color is never the only signal.
+ * Applications-by-status summary, drawn as plain HTML bars (no chart library
+ * for two bars). Colors are CVD-validated; every bar also carries a text
+ * label and count, so color is never the only signal.
  */
 const SLOTS = [
-  { key: 'Pending', label: 'Pending review', color: '#b07f10' },
   { key: 'Approved', label: 'Approved', color: '#14683f' },
   { key: 'Rejected', label: 'Rejected', color: '#b91c1c' },
 ];
@@ -14,14 +13,14 @@ export default function StatusChart({ applications }) {
 
   const counts = SLOTS.map((slot) => ({
     ...slot,
-    count: applications.filter((a) => a.decision === slot.key).length,
+    count: applications.filter((a) => a.status === slot.key).length,
   }));
   const max = Math.max(...counts.map((c) => c.count), 1);
 
   return (
     <div className="card chart-card">
       <div className="chart-head">
-        <h3>Decisions at a glance</h3>
+        <h3>Outcomes at a glance</h3>
         <span className="note">{applications.length} total</span>
       </div>
       <div role="img" aria-label={counts.map((c) => `${c.label}: ${c.count}`).join(', ')}>

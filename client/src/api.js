@@ -41,25 +41,6 @@ export function submitApplication(payload) {
   return request('/api/applications', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export function loginOfficer(credentials) {
-  return request('/api/auth/login', { method: 'POST', body: JSON.stringify(credentials) });
-}
-
-export function logoutOfficer(token) {
-  return fetch('/api/auth/logout', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-  }).catch(() => {}); // best-effort; the client forgets the session either way
-}
-
-export function decideApplication(id, decision, token) {
-  return request(`/api/applications/${id}/decision`, {
-    method: 'PATCH',
-    body: JSON.stringify({ decision }),
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-  });
-}
-
 export function fetchApplications({ status, sortBy, order }) {
   const params = new URLSearchParams();
   if (status) params.set('status', status);

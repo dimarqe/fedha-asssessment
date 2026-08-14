@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
       <div className="card toolbar">
         <label>
-          Eligibility
+          Status
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
             <option>All</option>
             <option>Approved</option>
@@ -94,8 +94,7 @@ export default function DashboardPage() {
                 <th>Requested</th>
                 <th>Term</th>
                 <th>Monthly</th>
-                <th>Eligibility</th>
-                <th>Decision</th>
+                <th>Status</th>
                 <th>Submitted</th>
               </tr>
             </thead>
@@ -110,9 +109,6 @@ export default function DashboardPage() {
                   <td>{app.status === 'Rejected' ? '—' : formatMoney(app.monthlyInstallment)}</td>
                   <td>
                     <span className={`badge ${app.status.toLowerCase()}`}>{app.status}</span>
-                  </td>
-                  <td>
-                    <span className={`badge ${app.decision.toLowerCase()}`}>{app.decision}</span>
                   </td>
                   <td>{formatDate(app.submittedAt)}</td>
                 </tr>

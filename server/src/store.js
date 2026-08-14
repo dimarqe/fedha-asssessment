@@ -54,12 +54,3 @@ export function addApplication(record) {
   persist();
   return withId;
 }
-
-export function updateApplication(id, patch) {
-  load();
-  const index = applications.findIndex((a) => a.id === id);
-  if (index === -1) return null;
-  applications[index] = { ...applications[index], ...patch };
-  persist();
-  return applications[index];
-}
