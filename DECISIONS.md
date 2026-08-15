@@ -1,86 +1,37 @@
 # Decisions & Trade-offs
 
-## Stack: React + Node (Express), no database server
+## Stack: React + Node (Express)
 
-I picked the JavaScript/React + Node option because it's the stack I'm most productive in, and
-it keeps the whole project in one language — the domain logic, the API, and the UI all read the
-same way, which matters when a reviewer has limited time. Express over a heavier framework
-because the API surface is three endpoints; anything more would be scaffolding for its own sake.
+I chose React with Node and Express because it is a stack I’m comfortable working with and it allows the project to stay in one language from the backend through to the UI. I used Express because the application only needs a small API, so a heavier framework would add unnecessary complexity.
 
-Storage is a single JSON file behind a small store module (`server/src/store.js`) with
-atomic-rename writes. The brief explicitly allowed this, and it keeps setup to `npm install` with
-zero native dependencies. The trade-off is obvious — no concurrent-process safety, no querying —
-but the store's interface (`list/get/add`) is the only thing the rest of the server touches, so
-swapping in SQLite or Postgres later is a one-file change.
+For storage, I used a JSON file through a small store module. This keeps the setup simple and follows the assessment requirement that allows in-memory, JSON, or SQLite storage. The main trade-off is that a JSON file is not suitable for multiple processes or larger workloads, but the store is isolated enough that it could be replaced with SQLite or PostgreSQL later without changing the rest of the application.
 
-## The logic lives on the server, once
+## Business Logic and Money Handling
 
-Eligibility and repayment are computed only in `server/src/loan.js` and stored with the
-application record. The client re-implements just the *input validation* rules for instant
-feedback, but never the money math — the numbers a customer sees are always the server's. In a
-financial product I'd rather have one source of truth and an extra network round-trip than two
-implementations that can drift apart.
+Eligibility and repayment calculations are handled on the server so there is only one source of truth. The client handles basic input validation for immediate feedback, but the actual financial calculations are always performed by the server.
 
-## Money math in integer cents
+Money is handled in integer cents to avoid floating-point rounding issues. Installments are rounded to two decimal places, with the final payment adjusted for any remaining cents so that the repayment schedule always matches the total amount owed.
 
-All amounts are converted to integer cents before any arithmetic, and back to 2-dp currency at
-the edges. Floating-point drift on money is exactly the kind of subtle bug this assessment hints
-at, and the classic failure mode is a schedule that doesn't sum to the total repayable. The
-schedule rounds each installment to the cent and lets the final installment absorb the
-remainder, and there's a test asserting the schedule sums exactly.
+## Interest Calculation
 
-## Interest interpretation
+I interpreted the 12% annual flat interest as:
 
-"Flat 12% per annum spread evenly across the term" is implemented as
-`principal × 12% × (termMonths / 12)` — a 6-month loan accrues half a year of interest, a
-24-month loan two years. The alternative reading (12% of principal regardless of term) seemed
-less consistent with "per annum". I flagged this as the kind of assumption I'd confirm with a
-product owner before shipping; changing it is a one-line edit with tests to update.
+`principal × 12% × (termMonths / 12)`
 
-## One status, not two — a stretch goal I built and then removed
+This means a six-month loan receives half a year of interest, while a 24-month loan receives two years of interest. This interpretation seemed most consistent with the phrase "per annum." If this were a production system, I would confirm the calculation with the product team before release.
 
-I built the optional officer-authentication stretch goal: a login, a role gate on the server,
-and a human Approve/Reject decision stored separately from the automatic eligibility result.
-It worked, and I took it out again.
+## Trade-offs
 
-The problem was what it did to the applicant. The brief asks for an eligibility outcome
-displayed as Approved or Rejected; adding an officer decision meant every application carried
-two statuses that could disagree — "Approved" by the rule and "Pending" or "Rejected" by a
-person. There is no honest way to show both to a customer at a glance, and the word they read
-first is "Approved". Papering over it took a derived third status, per-combination wording, and
-a stack of edge cases (approved-by-exception, declined-after-review) that the brief never asked
-for.
+I originally implemented the optional authentication and officer approval feature, but removed it because it introduced a second status that could conflict with the application's eligibility result. Keeping one clear Approved or Rejected status better matched the core requirements of the assessment.
 
-So I cut it. One application, one status, decided by the stated rule. That costs the
-authentication stretch goal — a deliberate trade: the brief is explicit that nailing the core
-requirements scores higher than reaching for stretch goals at their expense. The officer
-workflow that would resolve this properly is a real state machine with an audit trail, which I
-designed in my Part A answers rather than half-built here.
+I also kept the application intentionally simple. There are no intermediate application statuses, the tests focus mainly on the financial logic, and the UI uses plain CSS instead of a component library. These choices kept the project focused on the required functionality rather than adding complexity that wasn't necessary for the assessment.
 
-## Trade-offs made under time pressure
+## What I Would Improve With More Time
 
-- **No auth or officer role** — see above: built, then removed in favour of one unambiguous
-  status per application. A role picker without a password was the other option, but selecting
-  a role isn't authenticating as one, and "anyone who visits can approve a loan" is the wrong
-  default for a lending system.
-- **No intermediate statuses.** An application is Approved or Rejected the moment it's assessed.
-  The richer state machine is designed in my Part A answers; building it here would have doubled
-  the surface area without demonstrating much more.
-- **Tests target the domain logic only.** The API layer is thin enough to verify by hand;
-  the money math is where a subtle bug would actually hurt.
-- **Plain CSS, no component library** — the UI needed to be clear, not impressive, and one small
-  stylesheet is easier to review than a Tailwind config.
+With additional time, I would:
 
-## What I'd do differently with more time
-
-1. **SQLite via the store interface** — real persistence with zero infrastructure.
-2. **Officer review workflow, done properly** — the Submitted → Under Review →
-   Approved/Rejected/Info-Requested state machine from Part A, with real accounts, an audit
-   trail of every transition, and applicant-facing wording designed around it rather than
-   bolted on.
-3. **API-level integration tests** (supertest) on top of the unit tests.
-4. **Durable hosting** — the app is deployed, but Render's free tier gives it an ephemeral disk,
-   so the JSON store resets on every deploy. Seeding demo data on an empty store keeps the demo
-   usable; a real fix is a managed database, which is the same change as (1).
-5. **Accessibility pass** — the form has labels and keyboard focus states, but I'd want proper
-   `aria-live` announcements for validation errors and the submission outcome.
+1. Replace the JSON storage with SQLite for more reliable persistence.
+2. Add a proper officer review workflow with authentication and an audit trail.
+3. Add API integration tests alongside the existing unit tests.
+4. Use a managed database for production deployment instead of file-based storage.
+5. Do a more thorough accessibility review, particularly for validation and submission messages.

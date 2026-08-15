@@ -5,11 +5,11 @@ repayment logic, and reviewing the results. Built for the Fedha Web Developer as
 
 **Stack:** React (Vite) frontend · Node.js (Express) API · JSON-file storage
 
-**Live demo:** https://fedha-asssessment.onrender.com/ — hosted on Render's free tier, so the
+**Live demo:** https://fedha-assessment-final.onrender.com/ — hosted on Render's free tier, so the
 first request after a period of inactivity takes ~30 seconds while the instance wakes up, and
 submitted data resets on redeploy (the filesystem is ephemeral). Both are accepted trade-offs
 for a zero-cost demo. An empty store seeds five demo applications on first boot, so the
-dashboard always has something to filter, sort and decide on — set `SEED_DEMO_DATA=false` to
+dashboard always has something to filter, sort on — set `SEED_DEMO_DATA=false` to
 start empty instead.
 
 ## Features
@@ -78,8 +78,6 @@ client/
 
 ## Assumptions
 
-- **Currency is JMD** (Fedha operates in Jamaica), displayed as J$ to avoid reading as USD;
-  the backend is currency-agnostic — only the frontend formatting assumes JMD.
 - **Money is computed in integer cents** to avoid floating-point drift. Installments are rounded
   to the cent and the **final installment absorbs the rounding remainder**, so the schedule
   always sums exactly to the total repayable.
@@ -92,17 +90,7 @@ client/
 
 ## Deliberately left out (and why)
 
-- **Authentication and an officer role** — the brief's core requirement is an automatic
-  Approved/Rejected outcome, and adding a human decision step on top of it gave an applicant two
-  conflicting statuses to read. I chose the simpler, unambiguous model: one status per
-  application, decided by the eligibility rule.
 - **A real database** — a JSON file is enough for single-process, low-volume use and keeps setup
   to `npm install`. The store module is isolated so swapping in SQLite/Postgres touches one file.
-- **The fuller status workflow** — every application here lands on Approved or Rejected
-  immediately. The richer state machine (Under Review, Info Requested, officer decisions,
-  appeals, an audit trail of every transition) is designed in my Part A answers; building it
-  would have doubled the surface area without demonstrating much more.
 - **Pagination** — unnecessary at assessment scale; the list endpoint already strips schedules
   to keep payloads small.
-
-See `DECISIONS.md` for stack choice and trade-off notes.
